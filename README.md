@@ -1,11 +1,10 @@
-# BERT-BiLSMT-CRF-NER
+# BERT-NER
 Tensorflow solution of NER task Using BiLSTM-CRF model with Google BERT Fine-tuning
 
-使用谷歌的BERT模型在BLSTM-CRF模型上进行预训练用于中文命名实体识别的Tensorflow代码'
-
-中文文档请查看https://blog.csdn.net/macanv/article/details/85684284  如果对您有帮助，麻烦点个star,谢谢~~  
 
 Welcome to star this repository!
+
+使用谷歌的BERT模型在BLSTM-CRF模型上进行预训练用于中文命名实体识别的Tensorflow代码:https://github.com/macanv/BERT-BiLSTM-CRF-NER
 
 The Chinese training data($PATH/NERdata/) come from:https://github.com/zjy-ucas/ChineseNER 
   
@@ -22,23 +21,17 @@ THIS PROJECT ONLY SUPPORT Python3.
 ## Download project and install  
 You can install this project by:  
 ```
-pip install bert-base==0.0.9 -i https://pypi.python.org/simple
+pip install -r requirement.txt
 ```
 
 OR
 ```angular2html
-git clone https://github.com/macanv/BERT-BiLSTM-CRF-NER
-cd BERT-BiLSTM-CRF-NER/
+git clone https://github.com/yuxuan2015/BERT-NER
+cd BERT-NER/
 python3 setup.py install
 ```
 
-if you do not want to install, you just need clone this project and reference the file of <run.py> to train the model or start the service. 
-
-## UPDATE:
-- 2019.2.25 Fix some bug for ner service
-- 2019.2.19: add text classification service
--  fix Missing loss error
-- add label_list params in train process, so you can using -label_list xxx to special labels in training process.  
+if you do not want to install, you just need clone this project and reference the file of <run.py> to train the model or start the service.  
   
     
 ## Train model:
@@ -74,16 +67,13 @@ The first one of each line is a token, the second is token's label, and the line
 You can get training data from above two git repos  
 You can training ner model by running below command:  
 ```angular2html
-bert-base-ner-train \
-    -data_dir {your dataset dir}\
-    -output_dir {training output dir}\
-    -init_checkpoint {Google BERT model dir}\
-    -bert_config_file {bert_config.json under the Google BERT model dir} \
-    -vocab_file {vocab.txt under the Google BERT model dir}
+sh train_ner.sh    ##命名实体识别
+
+sh train_class.sh    ##文本分类
 ```
 like my init_checkpoint: 
 ```
-init_checkpoint = F:\chinese_L-12_H-768_A-12\bert_model.ckpt
+init_checkpoint = /data/NLP_projects/Represstion/BERT/models/chinese_L-12_H-768_A-12
 ```
 you can special labels using -label_list params, the project get labels from training data.  
 ```angular2html
@@ -111,20 +101,11 @@ bert-base-serving-start -help
 
 and than you can using below cmd start ner service:
 ```angular2html
-bert-base-serving-start \
-    -model_dir C:\workspace\python\BERT_Base\output\ner2 \
-    -bert_model_dir F:\chinese_L-12_H-768_A-12
-    -model_pb_dir C:\workspace\python\BERT_Base\model_pb_dir
-    -mode NER
+sh start_NerServer.sh
 ```
 or text classification service:
 ```angular2html
-bert-base-serving-start \
-    -model_dir C:\workspace\python\BERT_Base\output\ner2 \
-    -bert_model_dir F:\chinese_L-12_H-768_A-12
-    -model_pb_dir C:\workspace\python\BERT_Base\model_pb_dir
-    -mode CLASS
-    -max_seq_len 202
+sh start_ClassServer.sh
 ```
 
 as you see:   
@@ -132,7 +113,7 @@ mode: If mode is NER/CLASS, then the service identified by the Named Entity Reco
 bert_model_dir: bert_model_dir is a BERT model, you can download from https://github.com/google-research/bert
 ner_model_dir: your ner model checkpoint dir
 model_pb_dir: model freeze save dir, after run optimize func, there will contains like ner_model.pb binary file  
->You can download my ner model from：https://pan.baidu.com/s/1m9VcueQ5gF-TJc00sFD88w, ex_code: guqq
+>You can download ner model from：https://pan.baidu.com/s/1m9VcueQ5gF-TJc00sFD88w, ex_code: guqq
 > Or text classification model from: https://pan.baidu.com/s/1oFPsOUh1n5AM2HjDIo2XCw, ex_code: bbu8   
 Set ner_mode.pb/classification_model.pb to model_pb_dir, and set other file to model_dir(Different models need to be stored separately, you can set ner models label_list.pkl and label2id.pkl to model_dir/ner/ and set text classification file to model_dir/text_classification) , Text classification model can classify 12 categories of Chinese data： '游戏', '娱乐', '财经', '时政', '股票', '教育', '社会', '体育', '家居', '时尚', '房产', '彩票'  
 
@@ -181,83 +162,7 @@ Note that it can not start NER service and Text Classification service together.
 ## License
 MIT.  
 
-# The following tutorial is an old version and will be removed in the future.
-
-## How to train
-#### 1. Download BERT chinese model :  
- ```
- wget https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zip  
- ```
-#### 2. create output dir
-create output path in project path:
-```angular2html
-mkdir output
-```
-#### 3. Train model
-
-##### first method 
-```
-  python3 bert_lstm_ner.py   \
-                  --task_name="NER"  \ 
-                  --do_train=True   \
-                  --do_eval=True   \
-                  --do_predict=True
-                  --data_dir=NERdata   \
-                  --vocab_file=checkpoint/vocab.txt  \ 
-                  --bert_config_file=checkpoint/bert_config.json \  
-                  --init_checkpoint=checkpoint/bert_model.ckpt   \
-                  --max_seq_length=128   \
-                  --train_batch_size=32   \
-                  --learning_rate=2e-5   \
-                  --num_train_epochs=3.0   \
-                  --output_dir=./output/result_dir/ 
- ```       
- ##### OR replace the BERT path and project path in bert_lstm_ner.py
- ```
- if os.name == 'nt': #windows path config
-    bert_path = '{your BERT model path}'
-    root_path = '{project path}'
-else: # linux path config
-    bert_path = '{your BERT model path}'
-    root_path = '{project path}'
- ```
- Than Run:
- ```angular2html
-python3 bert_lstm_ner.py
-```
-
-### USING BLSTM-CRF OR ONLY CRF FOR DECODE!
-Just alter bert_lstm_ner.py line of 450, the params of the function of add_blstm_crf_layer: crf_only=True or False  
-
-ONLY CRF output layer:
-```
-    blstm_crf = BLSTM_CRF(embedded_chars=embedding, hidden_unit=FLAGS.lstm_size, cell_type=FLAGS.cell, num_layers=FLAGS.num_layers,
-                          dropout_rate=FLAGS.droupout_rate, initializers=initializers, num_labels=num_labels,
-                          seq_length=max_seq_length, labels=labels, lengths=lengths, is_training=is_training)
-    rst = blstm_crf.add_blstm_crf_layer(crf_only=True)
-```
-  
-  
-BiLSTM with CRF output layer
-```
-    blstm_crf = BLSTM_CRF(embedded_chars=embedding, hidden_unit=FLAGS.lstm_size, cell_type=FLAGS.cell, num_layers=FLAGS.num_layers,
-                          dropout_rate=FLAGS.droupout_rate, initializers=initializers, num_labels=num_labels,
-                          seq_length=max_seq_length, labels=labels, lengths=lengths, is_training=is_training)
-    rst = blstm_crf.add_blstm_crf_layer(crf_only=False)
-```
-
-## Result:
-all params using default
-#### In dev data set:
-![](./pictures/picture1.png)
-
-#### In test data set
-![](./pictures/picture2.png)
-
-#### entity leval result:
-last two result are label level result, the entitly level result in code of line 796-798,this result will be output in predict process.
-show my entity level result :
-![](./pictures/03E18A6A9C16082CF22A9E8837F7E35F.png)
+## Model
 > my model can download from baidu cloud:  
 >链接：https://pan.baidu.com/s/1GfDFleCcTv5393ufBYdgqQ 提取码：4cus  
 NOTE: My model is trained by crf_only params
@@ -331,25 +236,16 @@ def get_labels(self):
 ```
 
 
-## NEW UPDATE
-2019.1.30 Support pip install and command line control  
-
-2019.1.30 Add Service/Client for NER process  
-
-2019.1.9: Add code to remove the adam related parameters in the model, and reduce the size of the model file from 1.3GB to 400MB.  
-  
-2019.1.3: Add online predict code  
-
-
-
 ## reference: 
 + The evaluation codes come from:https://github.com/guillaumegenthial/tf_metrics/blob/master/tf_metrics/__init__.py
 
-+ [https://github.com/google-research/bert](https://github.com/google-research/bert)
++ [google-bert](https://github.com/google-research/bert)
       
-+ [https://github.com/kyzhouhzau/BERT-NER](https://github.com/kyzhouhzau/BERT-NER)
++ [BERT-NER](https://github.com/kyzhouhzau/BERT-NER)
 
-+ [https://github.com/zjy-ucas/ChineseNER](https://github.com/zjy-ucas/ChineseNER)
++ [ChineseNER](https://github.com/zjy-ucas/ChineseNER)
 
-+ [https://github.com/hanxiao/bert-as-service](https://github.com/hanxiao/bert-as-service)
++ [bert-as-service](https://github.com/hanxiao/bert-as-service)
 > Any problem please open issue OR email me(ma_cancan@163.com)
+
++ [BERT-BiLSTM-CRF-NER](https://github.com/macanv/BERT-BiLSTM-CRF-NER)
