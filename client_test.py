@@ -47,5 +47,5 @@ def class_test(ip="localhost", port=5555, port_out=5556):
 
 if __name__ == '__main__':
     # class_test()
-    ner_test("192.168.31.233")
-    # ner_cu_seg("192.168.31.233")
+    ner_test("localhost")
+    # ner_cu_seg("localhost")
